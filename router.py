@@ -1,6 +1,7 @@
 import socket
-import threading
+import threading, pickle
 from utils import Utils
+from client import Client
 
 #Thread d'analyse des trames entrantes pour un client donné
 class ClientThread(threading.Thread):
@@ -8,29 +9,28 @@ class ClientThread(threading.Thread):
     #Passage de notre toolbox et du client en question en paramètre
     def __init__(self, utils, client):
         threading.Thread.__init__(self)
-        #Déclaration des attributs
-        self.ip = client[0]
-        self.port = client[1]
-        self.clientsocket = client[2]
         self.utils = utils
+        self.client = client
 
     def run(self):
         #Affichage des infos du client
-        self.utils.print_log(self.ip, self.port, "Connexion")
+        self.client.print_log("Connexion")
 
         #Attente des trames entrantes
         while True:
-            r = self.clientsocket.recv(2048)
+            data = self.client.clientsocket.recv(2048)
+            #Désérialization
+            trame = pickle.loads(data)
             #Sortie de boucle si la trame est vide (le client s'est déconnecté)
-            if r == b'':
+            if trame.payLoad == "" or trame.payLoad == "exit":
                 break
             #Affichage de la trame
-            self.utils.print_log(self.ip, self.port, r)
+            self.client.print_log(trame.payLoad)
 
         #Déconnexion du client
-        self.utils.print_log(self.ip, self.port, "Déconnexion")
+        self.client.print_log("Déconnexion")
         #On l'enlève de la liste des clients actifs
-        self.utils.remove_client(self.ip, self.port)
+        self.utils.clients.remove(self.client)
 
 class Router(threading.Thread):
     def __init__(self):
@@ -49,7 +49,7 @@ class Router(threading.Thread):
             tcpsock.listen(10)
             #Connexion d'un client
             (clientsocket, (ip, port)) = tcpsock.accept()
-            client = [ip, port, clientsocket]
+            client = Client(ip, port, clientsocket)
             #Ajout à la liste des clients actifs
             self.utils.clients.append(client)
             #Déclaration du thread du client en question
