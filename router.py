@@ -20,6 +20,8 @@ class ClientThread(threading.Thread):
         while True:
             data = self.client.clientsocket.recv(2048)
             #Désérialization
+            if data == b'':
+                break
             trame = pickle.loads(data)
             #Sortie de boucle si la trame est vide (le client s'est déconnecté)
             if trame.payLoad == "" or trame.payLoad == "exit":
