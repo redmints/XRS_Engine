@@ -28,6 +28,14 @@ class ClientThread(threading.Thread):
                 break
             #Affichage de la trame
             self.client.print_log(trame.payLoad)
+            if trame.typeSrc == 1:
+                self.client.print_log("Je suis ton client")
+                if trame.typePayLoad == 1:
+                    self.client.print_log("Je t'envoie une requete pour transfert vers un autre serveur")
+            if trame.typeSrc == 2:
+                self.client.print_log("Je suis un autre serveur")
+                if trame.typePayLoad == 1:
+                    self.client.print_log("Je te donne la réponse que tu attendais")
 
         #Déconnexion du client
         self.client.print_log("Déconnexion")
