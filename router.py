@@ -24,7 +24,7 @@ class ClientThread(threading.Thread):
                 break
             trame = pickle.loads(data)
             #Sortie de boucle si la trame est vide (le client s'est déconnecté)
-            if trame.payLoad == "" or trame.payLoad == "exit":
+            if trame.payLoad == "exit":
                 break
             #Affichage de la trame
             self.client.print_log(trame.payLoad)
@@ -52,7 +52,7 @@ class Router(threading.Thread):
         #Déclaration de l'ouverture de la socket
         tcpsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         tcpsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        tcpsock.bind(("",1111))
+        tcpsock.bind(("",1664))
 
         #Scan des nouveaux clients qui arrivent
         while True:
